@@ -42,7 +42,7 @@ class ChatBot:
                 func=weather.run,
                 description="Provides weather information."
             ),
-            vision_caption,
+            # vision_caption,
             vision_control,
             Tool(
                 name="Bash Process",

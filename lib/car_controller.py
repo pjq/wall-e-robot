@@ -13,7 +13,7 @@ def send_car_action(action: str):
     car_action = CarAction()
     car_action.set_action(action)
     car_action.set_duration(1000)
-    car_action.set_speed(50)
+    car_action.set_speed(30)
     car_action.set_angle(0)
 
     host = config.settings.car_api_url

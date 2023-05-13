@@ -10,7 +10,7 @@ from lib.vision_caption import VisionCaptionTool
 
 class VisionControl(BaseTool):
     name = "camera_position_control_tool"
-    description = "useful when you want to control the camera position, it can be `up`, `down`, `left`, `right`, " \
+    description = "useful when you want to control the camera position and what you can see, it can be `up`, `down`, `left`, `right`, " \
                   "`stop`, other actions will be forbidden "
     args_schema: Type[VisionPositionScheme] = VisionPositionScheme
 

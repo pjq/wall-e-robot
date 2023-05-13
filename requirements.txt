@@ -1,0 +1,19 @@
+openai
+langchain
+llama-cpp-python
+pyllamacpp
+chromadb
+google-api-python-client
+tiktoken
+llama_index
+requests==2.28.1
+wolframalpha
+pyowm
+urllib3 == 1.26.15
+scikit-learn
+cohere
+opencv-python
+Pillow
+torch
+transformers
+response_generation.py

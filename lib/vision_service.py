@@ -13,11 +13,6 @@ from lib.response_generation import generate_response
 
 class VisionService:
     def __init__(self):
-        # create VideoCapture object for camera feed
-        self.cap = cv2.VideoCapture(0)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 280)
-
         # initialize variable for tracking processing times
         self.last_process_time = time.time()
         self.last_generation_time = time.time()
@@ -27,6 +22,11 @@ class VisionService:
         self.sequence_list = []  # initialize list to hold generated captions, user input, and responses in sequence
         self.started = False
 
+    def start(self):
+        # self.main_loop()
+        if not vision.started:
+            caption_generation.init()
+            threading.Thread(target=vision.main_loop()).start()  # start thread to wait for user input
 
     # convert frame to PIL image format and generate caption for a frame
     def process_frame(self, frame):
@@ -90,6 +90,11 @@ class VisionService:
 
 
     def main_loop(self):
+        # create VideoCapture object for camera feed
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 280)
+
         self.started = True
         global last_process_time
         # threading.Thread(target=get_user_input).start()  # start thread to wait for user input
@@ -114,8 +119,8 @@ class VisionService:
         cv2.destroyAllWindows()
 
 vision = VisionService()
-if not vision.started:
-    threading.Thread(target=vision.main_loop()).start()  # start thread to wait for user input
+# if not vision.started:
+#     threading.Thread(target=vision.main_loop()).start()  # start thread to wait for user input
 
 def setup_config(config_file):
     if not os.path.exists(config_file):

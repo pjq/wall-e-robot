@@ -16,4 +16,3 @@ opencv-python
 Pillow
 torch
 transformers
-response_generation.py

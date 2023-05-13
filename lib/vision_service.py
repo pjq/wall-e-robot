@@ -23,10 +23,10 @@ class VisionService:
         self.started = False
 
     def start(self):
-        # self.main_loop()
-        if not vision.started:
+        # print("vision service start")
+        if not self.started:
             caption_generation.init()
-            threading.Thread(target=vision.main_loop()).start()  # start thread to wait for user input
+            self.main_loop()
 
     # convert frame to PIL image format and generate caption for a frame
     def process_frame(self, frame):
@@ -35,31 +35,65 @@ class VisionService:
         # print(f"caption: {caption}")
 
         self.current_time = time.time()  # track current time for processing time comparison
-        if self.current_time - self.last_generation_time >= 5:  # generate captions every 5 seconds
+        if self.current_time - self.last_generation_time >= 1:  # generate captions every 5 seconds
             if caption and caption not in self.previous_captions and caption not in self.sequence_list:
                 self.sequence_list.append(('Caption', caption))  # add caption to sequence list
-                print(f"caption append: {caption}")
+                # print(f"caption append: {caption}")
                 self.previous_captions.append(caption)  # add caption to list of previous captions
                 if len(self.previous_captions) > 10:  # limit list of captions to 10 items
                     self.previous_captions.pop(0)
             self.last_generation_time = self.current_time  # update last generation time
 
 
+    def display_frame1(self, frame):
+        """
+        Function to display a frame on the screen and overlay the previous captions on top of it.
+        """
+        with self.lock:  # synchronize with lock
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1.0
+            thickness = 2
+            color = (0, 255, 0)
+            org = (10, 50)
+
+            captions_str = "Caption"
+            if len(self.sequence_list)>0:
+                captions_str = self.sequence_list[-1][1]
+            # self.captions_str = self.captions_str
+            flipped_frame = cv2.flip(frame, 1)  # Flip the frame horizontally
+            cv2.putText(frame, captions_str, org, font, font_scale, color, thickness, cv2.LINE_AA)
+            cv2.imshow('frame', flipped_frame)
+
     def display_frame(self, frame):
         """
         Function to display a frame on the screen and overlay the previous captions on top of it.
         """
-        global previous_captions
         with self.lock:  # synchronize with lock
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.0
-            thickness = 1
-            color = (0, 0, 0)
+            color = (0, 255, 0)
+
+            if len(self.sequence_list) > 0:
+                captions_str = self.sequence_list[-1][1]  # Get the last caption in the list
+            else:
+                captions_str = "No Captions"
+
+            # Determine font size based on the height of the text
+            font_scale = 1.0
+            thickness = 2
             org = (10, 20)
-            self.captions_str = '\n'.join(self.previous_captions)
-            cv2.putText(frame, self.captions_str, org, font, font_scale, color, thickness, cv2.LINE_AA)
-            flipped_frame = cv2.flip(frame, 1)  # Flip the frame horizontally
-            cv2.imshow('frame', flipped_frame)
+
+            while True:
+                (text_width, text_height), _ = cv2.getTextSize(captions_str, font, font_scale, thickness)
+                if text_width <= frame.shape[1] - 20:  # Check if the text fits within the frame
+                    break
+                font_scale -= 0.1
+
+            # Adjust text position to center it horizontally
+            org = ((frame.shape[1] - text_width) // 2, org[1] + text_height)
+            rotated_frame = cv2.flip(frame, 1)  # Flip the frame horizontally
+
+            cv2.putText(rotated_frame, captions_str, org, font, font_scale, color, thickness, cv2.LINE_AA)
+            cv2.imshow("frame", rotated_frame)
 
     def get_user_input(self):
         import sys
@@ -90,6 +124,7 @@ class VisionService:
 
 
     def main_loop(self):
+        # print("start vision main_loop")
         # create VideoCapture object for camera feed
         self.cap = cv2.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -119,8 +154,6 @@ class VisionService:
         cv2.destroyAllWindows()
 
 vision = VisionService()
-# if not vision.started:
-#     threading.Thread(target=vision.main_loop()).start()  # start thread to wait for user input
 
 def setup_config(config_file):
     if not os.path.exists(config_file):

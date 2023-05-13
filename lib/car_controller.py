@@ -1,6 +1,4 @@
 import requests
-from typing import Dict
-
 import config
 from lib.car_action import CarAction
 
@@ -18,25 +16,11 @@ def send_car_action(action: str):
     car_action.set_speed(50)
     car_action.set_angle(0)
 
-    payload = car_action.to_dict()
-    success = send_car_action(payload)
-    if success:
-        print("Car action sent successfully!")
-    else:
-        print("Error sending car action.")
-
-    return success
-
-
-def send_car_action(car_action: CarAction) -> bool:
-    return send_car_action(car_action.to_dict())
-
-def send_car_action(car_action: Dict) -> bool:
     host = config.settings.car_api_url
     url = f"{host}/api/car/controller"
     headers = {"Content-Type": "application/json"}
     try:
-        response = requests.post(url, json=car_action, headers=headers)
+        response = requests.post(url, json=car_action.to_dict(), headers=headers)
         if response.status_code == requests.codes.ok:
             return True
         else:
@@ -44,7 +28,6 @@ def send_car_action(car_action: Dict) -> bool:
     except requests.exceptions.RequestException:
         return False
 
-import requests
 
 class CarController:
     ENDPOINT = "http://localhost:8000/car/action"

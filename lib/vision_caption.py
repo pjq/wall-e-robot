@@ -48,9 +48,10 @@ class VisionCaptionTool(BaseTool):
             ]
         }
 
-        caption = vision.sequence_list.pop()
-        if caption:
-            return caption
+        if vision.sequence_list.__len__() !=0 :
+            caption = vision.sequence_list.pop()
+            if caption:
+                return caption[1]
 
         if position not in positions:
             # return "Invalid position. Please use left, right, front, or back."

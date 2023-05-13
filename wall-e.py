@@ -8,6 +8,7 @@ import config
 from lib import edge_tts_playback
 from lib import vision_service
 import openai
+import threading
 
 class ChatBot:
     def __init__(self):
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument("--config", dest="config", default="myconfig.json", help="Path to the config file")
     args = parser.parse_args()
     setup_config(args.config)
-    vision_service.vision.start()
 
     bot = ChatBot()
-    bot.start_chat()
+    threading.Thread(target=bot.start_chat).start()  # start thread to wait for user input
+    vision_service.vision.start()

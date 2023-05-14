@@ -8,5 +8,7 @@
   "whisper_cpp_path":"",
   "edge_tts_enable": true,
   "car_api_url": "",
+  "car_camera_stream_enable": false,
+  "car_camera_stream_url": "",
   "edge_tts_voice": "en-US-JennyNeural",
 }

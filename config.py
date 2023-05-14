@@ -25,5 +25,7 @@ def load_config(config_file):
     settings.blip_model = config_data["blip_model"]
     settings.whisper_cpp_path = config_data["whisper_cpp_path"]
     settings.car_api_url = config_data["car_api_url"]
+    settings.car_camera_stream_url = config_data["car_camera_stream_url"]
+    settings.car_camera_stream_enable = config_data["car_camera_stream_enable"]
 
     return settings

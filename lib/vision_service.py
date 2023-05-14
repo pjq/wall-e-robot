@@ -126,7 +126,11 @@ class VisionService:
     def main_loop(self):
         # print("start vision main_loop")
         # create VideoCapture object for camera feed
-        self.cap = cv2.VideoCapture(0)
+        if config.settings.car_camera_stream_enable and config.settings.car_camera_stream_url:
+            self.cap = cv2.VideoCapture(config.settings.car_camera_stream_url)
+        else:
+            self.cap = cv2.VideoCapture(0)
+
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 280)
 
@@ -137,7 +141,9 @@ class VisionService:
             ret, frame = self.cap.read()
             if not ret:
                 print("Error capturing frame, exiting.")
-                break
+                time.sleep(5)
+                continue
+                # break
 
             self.current_time = time.time()
             if self.current_time - self.last_process_time >= 5:  # process frame every 5 seconds
@@ -147,7 +153,7 @@ class VisionService:
 
             self.display_frame(frame)
 
-            if cv2.waitKey(1) == ord('q'):
+            if cv2.waitKey(1) == ord('q') or (cv2.waitKey(1) & 0xFF == 27):
                 break
 
         self.cap.release()

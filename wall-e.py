@@ -85,6 +85,8 @@ def setup_config(config_file):
     print("blip_model:", settings.blip_model)
     print("whisper_cpp_path:", settings.whisper_cpp_path)
     print("car_api_url:", settings.car_api_url)
+    print("car_camera_stream_enable:", settings.car_camera_stream_enable)
+    print("car_camera_stream_url:", settings.car_camera_stream_url)
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:

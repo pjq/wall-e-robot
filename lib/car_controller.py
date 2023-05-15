@@ -27,17 +27,3 @@ def send_car_action(action: str):
             return False
     except requests.exceptions.RequestException:
         return False
-
-
-class CarController:
-    ENDPOINT = "http://localhost:8000/car/action"
-    HEADERS = {"Content-Type": "application/json"}
-
-    @staticmethod
-    def send_car_action(action: dict) -> bool:
-        try:
-            response = requests.post(url=CarController.ENDPOINT, json=action, headers=CarController.HEADERS)
-            response.raise_for_status()
-            return True
-        except requests.exceptions.RequestException:
-            return False

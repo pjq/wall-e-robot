@@ -8,7 +8,7 @@ import random
 from lib.vision_service import VisionService,vision
 
 class VisionPositionScheme(BaseModel):
-    position: str = Field(description="should be the camera or visual position")
+    position: str = Field(description="should be the camera or visual position, 'up', 'down', 'left', 'right', 'stop'")
 
 class VisionCaptionTool(BaseTool):
     name = "vision_caption_tool"
@@ -47,7 +47,7 @@ class VisionCaptionTool(BaseTool):
             ]
         }
 
-        if vision.sequence_list.__len__() !=0 :
+        if vision.sequence_list.__len__() > 0:
             caption = vision.sequence_list.pop()
             if caption:
                 return caption[1]

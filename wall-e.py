@@ -1,6 +1,7 @@
 import argparse
 import os
-from langchain.agents import Tool, initialize_agent, AgentType
+from datetime import datetime
+from langchain.agents import Tool, initialize_agent, load_tools, AgentType
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 import lib.utils as proxy
@@ -9,6 +10,7 @@ from lib import edge_tts_playback
 from lib import vision_service
 import openai
 import threading
+
 
 class ChatBot:
     def __init__(self):
@@ -20,6 +22,7 @@ class ChatBot:
         weather = proxy.createOpenWeatherMap()
         vision_caption = proxy.createVisionCaption()
         vision_control = proxy.createVisionControl()
+        # browser = proxy.createBrowser()
 
         self.tools = [
             Tool(
@@ -44,6 +47,7 @@ class ChatBot:
             ),
             # vision_caption,
             vision_control,
+            # browser,
             Tool(
                 name="Bash Process",
                 func=bash.run,
@@ -51,14 +55,25 @@ class ChatBot:
             )
         ]
 
+        # self.tools += load_tools(["requests_all"])
+
         # Set up the chatbot
         self.memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
         self.llm = ChatOpenAI(temperature=1.0)
-        self.agent_chain = initialize_agent(self.tools, self.llm, agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION, verbose=True, memory=self.memory)
+        self.agent_chain = initialize_agent(self.tools, self.llm, agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
+                                            verbose=True, memory=self.memory)
 
     def start_chat(self):
         # Start chatting with the user
-        print('Bot: Hello! How can I assist you today?')
+        # print('Bot: Hello! How can I assist you today?')
+        now = datetime.now()  # current date and time
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")  # format the time as "YYYY-MM-DD HH:MM:SS"
+        default_prompt = f"Hi I am Jianqing Peng, an programmer, you're my Wall-E Roboto and also my personal assistant," \
+                         f"and I am in Shanghai, now the time is {current_time}."
+        response = self.agent_chain.run(default_prompt)
+        print(f'Bot: {response}')
+        if config.settings.edge_tts_enable:
+            edge_tts_playback.playTTS(response, config.settings.edge_tts_voice)
         while True:
             try:
                 user_input = input('You: ')
@@ -67,10 +82,15 @@ class ChatBot:
                     break
                 response = self.agent_chain.run(user_input)
                 print(f'Bot: {response}')
+                # print(f'***Memory***')
+                # print(self.memory.load_memory_variables({}))
+                # print(f'***Memory***')
+
                 if config.settings.edge_tts_enable:
                     edge_tts_playback.playTTS(response, config.settings.edge_tts_voice)
             except Exception as e:
                 print(f'An error occurred: {e}')
+
 
 def setup_config(config_file):
     if not os.path.exists(config_file):
@@ -94,6 +114,7 @@ def setup_config(config_file):
     openai.api_key = api_key
     if config.settings.openai_api_base_url:
         openai.api_base = config.settings.openai_api_base_url
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Example with config file support.")

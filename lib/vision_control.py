@@ -10,15 +10,20 @@ from lib.vision_caption import VisionCaptionTool
 
 class VisionControl(BaseTool):
     name = "camera_position_control_tool"
-    description = "useful when you want to control the camera position and what you can see, it can be `up`, `down`, `left`, `right`, " \
-                  "`stop`, other actions will be forbidden "
+    description = "A tool that allows you to control the camera position and view. You can move the camera in four directions: " \
+                  "'up', 'down', 'left', 'right', 'stop'. Any other actions will be forbidden."
+
     args_schema: Type[VisionPositionScheme] = VisionPositionScheme
 
     def _run(self, position: str) -> str:
     # def _run(self, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         """Use the tool."""
+        fake = True
         vision = VisionCaptionTool()
-        success = car_controller.send_car_action(position)
+        if fake:
+            success = True
+        else:
+            success = car_controller.send_car_action(position)
 
         if success:
             result = "success"

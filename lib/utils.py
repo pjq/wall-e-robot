@@ -1,4 +1,5 @@
 import openai
+from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 import os
 import requests
@@ -21,7 +22,8 @@ def createOpenAIWithProxy():
         session.proxies.update(proxies)
 
     # llm = OpenAI(session=session)
-    llm = OpenAI()
+    # llm = OpenAI()
+    llm = ChatOpenAI(temperature=0)
 
     return llm
 
@@ -103,3 +105,18 @@ def createVisionControl():
     tool = VisionControl()
 
     return tool
+
+
+def createBrowser():
+    from langchain.agents.agent_toolkits import PlayWrightBrowserToolkit
+    from langchain.tools.playwright.utils import (
+    create_async_playwright_browser,
+    create_sync_playwright_browser, # A synchronous browser is available, though it isn't compatible with jupyter.
+    )
+
+    async_browser = create_async_playwright_browser()
+    browser_toolkit = PlayWrightBrowserToolkit.from_browser(async_browser=async_browser)
+    tools = browser_toolkit.get_tools()
+
+    return tools
+

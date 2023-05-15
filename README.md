@@ -5,6 +5,7 @@ And you can talk with Robot, like "What can you see on your right?", and then it
 
 ## Dependencies/Features
 - OpenAI
+- Cohere AI
 - Langchain
 - Edge-TTS
 - Vision Capture(Salesforce BLIP)

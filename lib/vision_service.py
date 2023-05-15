@@ -3,6 +3,9 @@ import os.path
 import cv2
 import time
 import threading
+
+import numpy as np
+
 from lib import caption_generation, edge_tts_playback
 from lib import image_processing
 import config
@@ -30,12 +33,13 @@ class VisionService:
 
     # convert frame to PIL image format and generate caption for a frame
     def process_frame(self, frame):
+        start = time.time()
         pil_image = image_processing.convert_frame_to_pil_image(frame)
         caption = caption_generation.generate_caption(pil_image)
         # print(f"caption: {caption}")
 
         self.current_time = time.time()  # track current time for processing time comparison
-        if self.current_time - self.last_generation_time >= 1:  # generate captions every 5 seconds
+        if self.current_time - self.last_generation_time >= 1:  # generate captions every 1 seconds
             if caption and caption not in self.previous_captions and caption not in self.sequence_list:
                 self.sequence_list.append(('Caption', caption))  # add caption to sequence list
                 # print(f"caption append: {caption}")
@@ -44,6 +48,8 @@ class VisionService:
                     self.previous_captions.pop(0)
             self.last_generation_time = self.current_time  # update last generation time
 
+        use_time=time.time() - start;
+        # print(f"process_frame: {use_time}")
 
     def display_frame1(self, frame):
         """
@@ -57,7 +63,7 @@ class VisionService:
             org = (10, 50)
 
             captions_str = "Caption"
-            if len(self.sequence_list)>0:
+            if len(self.sequence_list) > 0:
                 captions_str = self.sequence_list[-1][1]
             # self.captions_str = self.captions_str
             flipped_frame = cv2.flip(frame, 1)  # Flip the frame horizontally
@@ -70,16 +76,21 @@ class VisionService:
         """
         with self.lock:  # synchronize with lock
             font = cv2.FONT_HERSHEY_SIMPLEX
-            color = (0, 255, 0)
+            color = (255, 255, 255)
 
             if len(self.sequence_list) > 0:
-                captions_str = self.sequence_list[-1][1]  # Get the last caption in the list
+                if len(self.sequence_list) > 1:
+                    # captions_str = self.sequence_list[-2][1] + '\n' + self.sequence_list[-1][
+                    #     1]  # Get the last caption in the list
+                    captions_str = self.sequence_list[-1][1]  # Get the last caption in the list
+                else:
+                    captions_str = self.sequence_list[-1][1]  # Get the last caption in the list
             else:
                 captions_str = "No Captions"
 
             # Determine font size based on the height of the text
-            font_scale = 1.0
-            thickness = 2
+            font_scale = 0.5
+            thickness = 1
             org = (10, 20)
 
             while True:
@@ -120,8 +131,7 @@ class VisionService:
 
                 print(response)  # print response to console
                 if config.settings.edge_tts_enable:
-                    edge_tts_playback.playTTS(response.replace('Alpha-Co-Bot',''), config.settings.edge_tts_voice)
-
+                    edge_tts_playback.playTTS(response.replace('Alpha-Co-Bot', ''), config.settings.edge_tts_voice)
 
     def main_loop(self):
         # print("start vision main_loop")
@@ -146,7 +156,7 @@ class VisionService:
                 # break
 
             self.current_time = time.time()
-            if self.current_time - self.last_process_time >= 5:  # process frame every 5 seconds
+            if self.current_time - self.last_process_time >= 3:  # process frame every 5 seconds
                 t = threading.Thread(target=self.process_frame, args=(frame,))
                 t.start()
                 self.last_process_time = self.current_time
@@ -159,7 +169,9 @@ class VisionService:
         self.cap.release()
         cv2.destroyAllWindows()
 
+
 vision = VisionService()
+
 
 def setup_config(config_file):
     if not os.path.exists(config_file):

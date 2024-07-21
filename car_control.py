@@ -1,5 +1,4 @@
 import logging
-import os
 from llama_index.core.tools import FunctionTool
 from pydantic import BaseModel, Field
 from llm_utils import load_and_initialize_llm
@@ -16,6 +15,11 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 import cv2  # OpenCV for capturing images from the camera
 # from lib.vision_service import VisionService
+# from lib import edge_tts_playback
+from lib.edge_tts_playback import playTTS  # Import the playTTS function
+import config
+
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 # Combine tools into a single agent
 llm = load_and_initialize_llm()
+voice = config.settings.edge_tts_voice_cn
 
 # Flag to enable mock functions
 USE_MOCK = True
@@ -189,6 +194,7 @@ def chatbot_interface():
                 print(image_path)
         else:
             response = agent.chat(user_input)
+            playTTS(response, voice)
             print(response)
 
 if __name__ == "__main__":

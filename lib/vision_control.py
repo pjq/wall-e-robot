@@ -18,7 +18,7 @@ class VisionControl(BaseTool):
     def _run(self, position: str) -> str:
     # def _run(self, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         """Use the tool."""
-        fake = True
+        fake = False
         vision = VisionCaptionTool()
         if fake:
             success = True

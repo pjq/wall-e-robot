@@ -13,6 +13,7 @@ from lib.response_generation import generate_response
 
 
 # import whisper_cpp
+enable_init_caption_generation=False
 
 class VisionService:
     def __init__(self):
@@ -28,7 +29,8 @@ class VisionService:
     def start(self):
         # print("vision service start")
         if not self.started:
-            caption_generation.init()
+            if enable_init_caption_generation:
+                caption_generation.init()
             self.main_loop()
 
     # convert frame to PIL image format and generate caption for a frame
@@ -69,6 +71,29 @@ class VisionService:
             flipped_frame = cv2.flip(frame, 1)  # Flip the frame horizontally
             cv2.putText(frame, captions_str, org, font, font_scale, color, thickness, cv2.LINE_AA)
             cv2.imshow('frame', flipped_frame)
+
+    def save_frame(self, frame, image_path="captured_image.jpg"):
+        """
+        Save the given frame as an image file.
+        
+        Args:
+            frame: The frame to be saved.
+            image_path: The path where the image will be saved.
+        """
+        # Convert the frame to RGB (if needed)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Save the frame as an image file
+        import time
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        image_path_with_time = f"captured/{image_path.split('.')[0]}_{timestamp}.{image_path.split('.')[-1]}"
+        import os
+
+        # Create the 'captured' directory if it doesn't exist
+        if not os.path.exists('captured'):
+            os.makedirs('captured')
+        cv2.imwrite(image_path_with_time, frame_rgb)
+        cv2.imwrite(image_path, frame_rgb)
 
     def display_frame(self, frame):
         """
@@ -156,11 +181,13 @@ class VisionService:
                 # break
 
             self.current_time = time.time()
-            if self.current_time - self.last_process_time >= 3:  # process frame every 5 seconds
-                t = threading.Thread(target=self.process_frame, args=(frame,))
-                t.start()
+            if self.current_time - self.last_process_time >= 20:  # process frame every 20 seconds
+                self.save_frame(frame)
+                if enable_init_caption_generation:
+                    t = threading.Thread(target=self.process_frame, args=(frame,))
+                    t.start()
                 self.last_process_time = self.current_time
-
+            
             self.display_frame(frame)
 
             if cv2.waitKey(1) == ord('q') or (cv2.waitKey(1) & 0xFF == 27):

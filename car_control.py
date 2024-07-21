@@ -17,8 +17,9 @@ import cv2  # OpenCV for capturing images from the camera
 # from lib.vision_service import VisionService
 # from lib import edge_tts_playback
 from lib.edge_tts_playback import playTTS  # Import the playTTS function
+from lib.car_controller import send_car_action  # Import the playTTS function
+from lib.vision_service import vision  # Import the playTTS function
 import config
-
 
 
 # Configure logging
@@ -30,7 +31,7 @@ llm = load_and_initialize_llm()
 voice = config.settings.edge_tts_voice_cn
 
 # Flag to enable mock functions
-USE_MOCK = True
+USE_MOCK = False
 
 # Real function to turn the car
 def turn_car(direction: str, duration: int) -> str:
@@ -39,6 +40,8 @@ def turn_car(direction: str, duration: int) -> str:
         logger.error("Invalid direction: %s", direction)
         return "Invalid direction. Please specify 'left', 'right', 'up', or 'down'."
     logger.info("Turning car %s for %d seconds", direction, duration)
+    send_car_action(direction)
+
     return f"Car turned {direction} for {duration} seconds."
 
 # Mock function to turn the car
@@ -86,8 +89,7 @@ def capture_image() -> str:
 def mock_capture_image() -> str:
     """Mock capture an image from the car's camera."""
     logger.info("Mock: Capturing image from camera")
-    # return "mock_captured_image.jpg"
-    return "image.png"
+    return "captured_image.jpg"
 
 # Function to process image URL
 def process_image_urls(image_url):
@@ -139,34 +141,38 @@ def display_image(image_path):
     plt.imshow(img)
     plt.show()
 
-# Select functions based on the flag
-turn_car_fn = mock_turn_car if USE_MOCK else turn_car
-capture_image_fn = mock_capture_image if USE_MOCK else capture_image
-capture_image_fn = capture_image
-describe_images_fn = mock_describe_images if USE_MOCK else describe_images
-describe_images_fn = describe_images
 
-# Define the tools using FunctionTool
-turn_car_tool = FunctionTool.from_defaults(
-    turn_car_fn,
-    name="TurnCarTool",
-    description="A tool to turn the car in specified direction for a given duration."
-)
+def car_init():
+    # Select functions based on the flag
+    turn_car_fn = mock_turn_car if USE_MOCK else turn_car
+    capture_image_fn = mock_capture_image if USE_MOCK else capture_image
+    capture_image_fn = mock_capture_image 
+    # capture_image_fn = capture_image
+    describe_images_fn = mock_describe_images if USE_MOCK else describe_images
+    # describe_images_fn = describe_images
 
-capture_image_tool = FunctionTool.from_defaults(
-    capture_image_fn,
-    name="CaptureImageTool",
-    description="A tool to capture an image from the car's camera."
-)
+    # Define the tools using FunctionTool
+    turn_car_tool = FunctionTool.from_defaults(
+        turn_car_fn,
+        name="TurnCarTool",
+        description="A tool to turn the car in specified direction for a given duration."
+    )
 
-describe_image_tool = FunctionTool.from_defaults(
-    describe_images_fn,
-    name="DescribeImageTool",
-    description="A tool to describe images captured by the car's camera."
-)
-tools = [turn_car_tool, capture_image_tool, describe_image_tool]
+    capture_image_tool = FunctionTool.from_defaults(
+        capture_image_fn,
+        name="CaptureImageTool",
+        description="A tool to capture an image from the car's camera."
+    )
 
-agent = ReActAgent.from_tools(tools, llm=llm, verbose=True)
+    describe_image_tool = FunctionTool.from_defaults(
+        describe_images_fn,
+        name="DescribeImageTool",
+        description="A tool to describe images captured by the car's camera."
+    )
+    tools = [turn_car_tool, capture_image_tool, describe_image_tool]
+    agent = ReActAgent.from_tools(tools, llm=llm, verbose=True)
+
+    return agent
 
 # ChatBot interface for car control
 def chatbot_interface():
@@ -198,6 +204,7 @@ def chatbot_interface():
             print(response)
 
 if __name__ == "__main__":
-    chatbot_interface()
+    logger.info("Main")
+    # chatbot_interface()
     # vision = VisionService()
     # vision.start()

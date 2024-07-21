@@ -1,0 +1,50 @@
+{
+  "Settings": {
+    "llm": {
+      "temperature": 0.2,
+      "model": "gpt-4o",
+      "api_key": "YOUR_API_KEY_HERE",
+      "api_base": "https://api.example.com/v1"
+    },
+    "others": {
+      "cohere_api_key": "YOUR_COHERE_API_KEY_HERE",
+      "openai_api_key": "YOUR_OPENAI_API_KEY_HERE",
+      "enable_openai": true,
+      "openai_api_base_url": "https://api.example.com/v1",
+      "enable_mps": false,
+      "whisper_cpp_path": "/path/to/whisper.cpp",
+      "edge_tts_enable": true,
+      "edge_tts_voice": "en-US-JennyNeural",
+      "edge_tts_voice_cn": "zh-CN-XiaoxiaoNeural",
+      "car_api_url": "http://YOUR_CAR_API_URL_HERE",
+      "car_camera_stream_enable": true,
+      "car_camera_stream_url": "http://YOUR_CAR_CAMERA_STREAM_URL_HERE",
+      "blip_model": "Salesforce/blip-image-captioning-large",
+      "blip_model2": "Salesforce/blip-image-captioning-base"
+    }
+  },
+  "SettingsMy": {
+    "llm": {
+      "temperature": 0.2,
+      "model": "gpt-4o",
+      "api_key": "YOUR_API_KEY_HERE",
+      "api_base": "https://api.example.com/v1"
+    },
+    "others": {
+      "cohere_api_key": "YOUR_COHERE_API_KEY_HERE",
+      "openai_api_key": "YOUR_OPENAI_API_KEY_HERE",
+      "enable_openai": true,
+      "openai_api_base_url": "https://api.example.com/v1",
+      "enable_mps": false,
+      "whisper_cpp_path": "/path/to/whisper.cpp",
+      "edge_tts_enable": true,
+      "edge_tts_voice": "en-US-JennyNeural",
+      "edge_tts_voice_cn": "zh-CN-XiaoxiaoNeural",
+      "car_api_url": "http://YOUR_CAR_API_URL_HERE",
+      "car_camera_stream_enable": true,
+      "car_camera_stream_url": "http://YOUR_CAR_CAMERA_STREAM_URL_HERE",
+      "blip_model": "Salesforce/blip-image-captioning-large",
+      "blip_model2": "Salesforce/blip-image-captioning-base"
+    }
+  }
+}

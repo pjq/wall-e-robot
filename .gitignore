@@ -161,3 +161,5 @@ cython_debug/
 myconfig.json
 config.json
 llamaindexQ/config.json
+captured_image.jpg
+

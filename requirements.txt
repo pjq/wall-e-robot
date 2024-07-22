@@ -17,3 +17,5 @@ Pillow
 torch
 transformers
 playwright
+llama-index-tools-google
+llama-index-tools-bing-search

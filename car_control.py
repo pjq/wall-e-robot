@@ -22,6 +22,8 @@ from lib.vision_service import vision  # Import the playTTS function
 import config
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.tools.bing_search import BingSearchToolSpec
+
 
 
 # Configure logging
@@ -29,7 +31,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 MOCK_TURN_CAR = False
-MOCK_CAPTURE_IMAGE = False 
+MOCK_CAPTURE_IMAGE = True
 MOCK_DESCRIBE_IMAGES = False
 
 class CarController:
@@ -51,7 +53,7 @@ class CarController:
             logger.error("Failed to play TTS: %s", e)
 
     def turn_car(self, direction: str, duration: int) -> str:
-        """Turn the car in the specified direction for a given duration."""
+        """Turn the car in the specified direction("left", "right", "up", "down") for a given duration(ms)."""
         if direction not in ["left", "right", "up", "down"]:
             logger.error("Invalid direction: %s", direction)
             return "Invalid direction. Please specify 'left', 'right', 'up', or 'down'."
@@ -132,6 +134,13 @@ class CarController:
         img = Image.open(image_path)
         plt.imshow(img)
         plt.show()
+    
+    # define prompt viewing function
+    def display_prompt_dict(prompts_dict):
+        for k, p in prompts_dict.items():
+            text_md = f"**Prompt Key**: {k}\n**Text:** {p.get_template()}"
+            logger.info(f"Key: {k}, Prompt: {p}, Markdown: {text_md}")
+
 
     def car_init(self):
         turn_car_tool = FunctionTool.from_defaults(
@@ -151,7 +160,18 @@ class CarController:
             name="DescribeImageTool",
             description="A tool to describe images captured by the car's camera."
         )
+
+        tool_spec = BingSearchToolSpec(api_key="your-key")
+        tool_spec_tool_list = tool_spec.to_tool_list()
         tools = [turn_car_tool, capture_image_tool, describe_image_tool]
+        tools.extend(tool_spec_tool_list)
+
+        from llama_index.tools.weather import OpenWeatherMapToolSpec
+
+        weather_tool_spec = OpenWeatherMapToolSpec(key="your-weather-api-key")
+        weather_tool_list = weather_tool_spec.to_tool_list()
+        tools.extend(weather_tool_list)
+
 
         chat_store = SimpleChatStore()
         chat_memory = ChatMemoryBuffer.from_defaults(
@@ -161,6 +181,8 @@ class CarController:
         )
 
         agent = ReActAgent.from_tools(tools, llm=self.llm, memory=chat_memory, verbose=True)
+        prompts = agent.get_prompts()
+        agent.update_prompts(prompts)
         return agent
 
 
